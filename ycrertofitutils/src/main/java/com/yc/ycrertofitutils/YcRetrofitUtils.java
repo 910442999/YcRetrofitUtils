@@ -6,8 +6,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.yc.ycrertofitutils.interfaces.OnCallBackListener;
-import com.yc.ycrertofitutils.request.RequestCallBack;
-import com.yc.ycrertofitutils.request.PostRequest;
 import com.yc.ycrertofitutils.service.BaseApiService;
 
 import org.apache.http.params.HttpParams;
