@@ -1,16 +1,13 @@
 package com.yc.ycretrofitutils;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.yc.ycrertofitutils.YcRetrofitUtils;
-import com.yc.ycrertofitutils.interfaces.OnCallBackListener;
-import com.yc.ycretrofitutils.BasicUse.BasicUseService;
+import com.yc.ycrertofitutils.interfaces.OnRequestCallBackListener;
 import com.yc.ycretrofitutils.base.UrlConfig;
 import com.yc.ycretrofitutils.model.NewsBean;
 
@@ -20,8 +17,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
 
 import static com.yc.ycretrofitutils.MyApplication.basicUseService;
 
@@ -47,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 mMap = new HashMap();
                 mMap.put("key", "4a216a3fde4361f175aa2678dada199b");
                 mMap.put("type", "top");
-                YcRetrofitUtils.get(UrlConfig.NEWS_URL, mMap, new OnCallBackListener() {
+                YcRetrofitUtils.get(UrlConfig.NEWS_URL, mMap, new OnRequestCallBackListener() {
 
                     @Override
                     public <Q> void onSuccess(Q body, String tag) {
@@ -70,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 mMap.put("type", "top");
 //                BasicUseService basicUseService = YcRetrofitUtils.getRetrofit().create(BasicUseService.class);
                 Flowable login = basicUseService.login("toutiao/index", mMap);
-                YcRetrofitUtils.requestCallBack(login, "", new OnCallBackListener() {
+                YcRetrofitUtils.requestCallBack(login, "", new OnRequestCallBackListener() {
                     @Override
                     public <Q> void onSuccess(Q body, String tag) {
                         if (body instanceof NewsBean) {

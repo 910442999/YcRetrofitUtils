@@ -2,13 +2,9 @@ package com.yc.ycrertofitutils;
 
 import android.app.Application;
 import android.content.Context;
-import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.yc.ycrertofitutils.interfaces.OnCallBackListener;
+import com.yc.ycrertofitutils.interfaces.OnRequestCallBackListener;
 import com.yc.ycrertofitutils.service.BaseApiService;
-
-import org.apache.http.params.HttpParams;
 
 import java.io.File;
 import java.util.HashMap;
@@ -25,11 +21,9 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import okhttp3.internal.http.HttpHeaders;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -373,7 +367,7 @@ public class YcRetrofitUtils {
      * @param url              链接
      * @param callBackListener 回调监听
      */
-    public static void get(String url, final OnCallBackListener callBackListener) {
+    public static void get(String url, final OnRequestCallBackListener callBackListener) {
         get(url, "", callBackListener);
     }
 
@@ -384,7 +378,7 @@ public class YcRetrofitUtils {
      * @param tag              类型
      * @param callBackListener 回调监听
      */
-    public static void get(String url, String tag, final OnCallBackListener callBackListener) {
+    public static void get(String url, String tag, final OnRequestCallBackListener callBackListener) {
         Flowable flowable = mBaseApiService.get(url);
         requestCallBack(flowable, tag, callBackListener);
     }
@@ -396,7 +390,7 @@ public class YcRetrofitUtils {
      * @param map              参数
      * @param callBackListener 回调监听
      */
-    public static void get(String url, Map map, final OnCallBackListener callBackListener) {
+    public static void get(String url, Map map, final OnRequestCallBackListener callBackListener) {
         get(url, map, "", callBackListener);
     }
 
@@ -408,7 +402,7 @@ public class YcRetrofitUtils {
      * @param tag              类型
      * @param callBackListener 回调监听
      */
-    public static void get(String url, Map map, String tag, final OnCallBackListener callBackListener) {
+    public static void get(String url, Map map, String tag, final OnRequestCallBackListener callBackListener) {
         Flowable flowable = mBaseApiService.get(url, map);
         requestCallBack(flowable, tag, callBackListener);
     }
@@ -421,7 +415,7 @@ public class YcRetrofitUtils {
      * @param map              参数
      * @param callBackListener 回调监听
      */
-    public static void post(String url, Map map, final OnCallBackListener callBackListener) {
+    public static void post(String url, Map map, final OnRequestCallBackListener callBackListener) {
         Flowable flowable = mBaseApiService.post(url, map);
         requestCallBack(flowable, "", callBackListener);
     }
@@ -434,7 +428,7 @@ public class YcRetrofitUtils {
      * @param callBackListener 回调监听
      * @param tag              调用的方法类型(区分调用的方法的回调参数)
      */
-    public static void post(String url, Map map, String tag, final OnCallBackListener callBackListener) {
+    public static void post(String url, Map map, String tag, final OnRequestCallBackListener callBackListener) {
         Flowable flowable = mBaseApiService.post(url, map);
         requestCallBack(flowable, tag, callBackListener);
     }
@@ -449,7 +443,7 @@ public class YcRetrofitUtils {
      * @param <T>              泛型参数
      */
 
-    public static <T> void requestCallBack(Flowable<T> flowable, final OnCallBackListener callBackListener) {
+    public static <T> void requestCallBack(Flowable<T> flowable, final OnRequestCallBackListener callBackListener) {
         requestCallBack(flowable, "", callBackListener);
     }
 
@@ -461,12 +455,12 @@ public class YcRetrofitUtils {
      * @param <T>              泛型参数
      */
 
-    public static <T> void requestCallBack(Flowable<T> flowable, final String tag, final OnCallBackListener callBackListener) {
+    public static <T> void requestCallBack(Flowable<T> flowable, final String tag, final OnRequestCallBackListener callBackListener) {
         sDisposableSubscriber = requestCallBack(tag, callBackListener);
         onSubscribe(flowable, sDisposableSubscriber);
     }
 
-    public static <T> DisposableSubscriber requestCallBack(final String tag, final OnCallBackListener callBackListener) {
+    public static <T> DisposableSubscriber requestCallBack(final String tag, final OnRequestCallBackListener callBackListener) {
         sDisposableSubscriber = new DisposableSubscriber<T>() {
             @Override
             public void onNext(T body) {
