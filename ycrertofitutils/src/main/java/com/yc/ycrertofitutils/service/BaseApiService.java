@@ -56,7 +56,7 @@ import retrofit2.http.Url;
  * 2.注意事项： map不能为null,否则该请求不会执行,但可以size为空.<br>
  * </p>
  */
-public interface BaseApiService{
+public interface BaseApiService {
     @GET()
     Flowable<ResponseBody> get(@Url String url);
 
@@ -70,14 +70,18 @@ public interface BaseApiService{
     @POST()
     Flowable<ResponseBody> postBody(@Url String url, @Body Object object);
 
+    @POST()
+    Flowable<ResponseBody> postBody(@Url String url, @Body RequestBody body);
+
+    @POST()
+    @Headers({"Content-Type: application/json", "Accept: application/json"})
+    Flowable<ResponseBody> postJson(@Url String url, @Body RequestBody jsonBody);
+
     @DELETE()
     Flowable<ResponseBody> delete(@Url String url, @QueryMap Map<String, String> maps);
 
     @PUT()
     Flowable<ResponseBody> put(@Url String url, @QueryMap Map<String, String> maps);
-
-    @POST()
-    Flowable<ResponseBody> putBody(@Url String url, @Body Object object);
 
     @Multipart
     @POST()
@@ -95,10 +99,5 @@ public interface BaseApiService{
     @GET
     Flowable<ResponseBody> downloadFile(@Url String fileUrl);
 
-    @POST()
-    @Headers({"Content-Type: application/json", "Accept: application/json"})
-    Flowable<ResponseBody> postJson(@Url String url, @Body RequestBody jsonBody);
 
-    @POST()
-    Flowable<ResponseBody> postBody(@Url String url, @Body RequestBody body);
 }

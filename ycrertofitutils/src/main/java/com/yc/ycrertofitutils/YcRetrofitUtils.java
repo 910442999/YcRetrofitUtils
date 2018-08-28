@@ -8,6 +8,7 @@ import com.yc.ycrertofitutils.service.BaseApiService;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -332,6 +334,7 @@ public class YcRetrofitUtils {
         }
         return t;
     }
+
     /**
      * 添加参数
      * 根据传进来的Object对象来判断是String还是File类型的参数
@@ -348,6 +351,7 @@ public class YcRetrofitUtils {
         }
         return this;
     }
+
     /**
      * 构建RequestBody
      */
@@ -416,8 +420,7 @@ public class YcRetrofitUtils {
      * @param callBackListener 回调监听
      */
     public static void post(String url, Map map, final OnRequestCallBackListener callBackListener) {
-        Flowable flowable = mBaseApiService.post(url, map);
-        requestCallBack(flowable, "", callBackListener);
+        post(url, map, "", callBackListener);
     }
 
     /**
@@ -432,6 +435,223 @@ public class YcRetrofitUtils {
         Flowable flowable = mBaseApiService.post(url, map);
         requestCallBack(flowable, tag, callBackListener);
     }
+
+    /**
+     * postBody
+     *
+     * @param url              链接
+     * @param object           参数
+     * @param callBackListener 回调监听
+     */
+    public static void postBody(String url, Object object, final OnRequestCallBackListener callBackListener) {
+        postBody(url, object, "", callBackListener);
+    }
+
+    /**
+     * postBody
+     *
+     * @param url              链接
+     * @param object           参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void postBody(String url, Object object, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.postBody(url, object);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * postBody
+     *
+     * @param url              链接
+     * @param requestBody      参数
+     * @param callBackListener 回调监听
+     */
+    public static void postBody(String url, RequestBody requestBody, final OnRequestCallBackListener callBackListener) {
+        postBody(url, requestBody, "", callBackListener);
+    }
+
+    /**
+     * postBody
+     *
+     * @param url              链接
+     * @param requestBody      参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void postBody(String url, RequestBody requestBody, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.postBody(url, requestBody);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * postJson
+     *
+     * @param url              链接
+     * @param requestBody      参数
+     * @param callBackListener 回调监听
+     */
+    public static void postJson(String url, RequestBody requestBody, final OnRequestCallBackListener callBackListener) {
+        postJson(url, requestBody, "", callBackListener);
+    }
+
+    /**
+     * postBody
+     *
+     * @param url              链接
+     * @param requestBody      参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void postJson(String url, RequestBody requestBody, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.postJson(url, requestBody);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * delete
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     */
+    public static void delete(String url, Map map, final OnRequestCallBackListener callBackListener) {
+        delete(url, map, "", callBackListener);
+    }
+
+    /**
+     * delete
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void delete(String url, Map map, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.delete(url, map);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * put
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     */
+    public static void put(String url, Map map, final OnRequestCallBackListener callBackListener) {
+        put(url, map, "", callBackListener);
+    }
+
+    /**
+     * put
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void put(String url, Map map, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.put(url, map);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * uploadFlie
+     *
+     * @param url              链接
+     * @param requestBody      描述
+     * @param part             文件
+     * @param callBackListener 回调监听
+     */
+    public static void uploadFlie(String url, RequestBody requestBody, MultipartBody.Part part, final OnRequestCallBackListener callBackListener) {
+        uploadFlie(url, requestBody, part, "", callBackListener);
+    }
+
+    /**
+     * uploadFlie
+     *
+     * @param url              链接
+     * @param requestBody      描述
+     * @param part             文件
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void uploadFlie(String url, RequestBody requestBody, MultipartBody.Part part, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.uploadFlie(url, requestBody, part);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * uploadFiles
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     */
+    public static void uploadFiles(String url, Map map, final OnRequestCallBackListener callBackListener) {
+        uploadFiles(url, map, "", callBackListener);
+    }
+
+    /**
+     * uploadFiles
+     *
+     * @param url              链接
+     * @param map              参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void uploadFiles(String url, Map map, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.uploadFiles(url, map);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * uploadFiles
+     *
+     * @param url              链接
+     * @param parts            参数
+     * @param callBackListener 回调监听
+     */
+    public static void uploadFiles(String url, List<MultipartBody.Part> parts, final OnRequestCallBackListener callBackListener) {
+        uploadFiles(url, parts, "", callBackListener);
+    }
+
+    /**
+     * uploadFiles
+     *
+     * @param url              链接
+     * @param parts            参数
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void uploadFiles(String url, List<MultipartBody.Part> parts, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.uploadFiles(url, parts);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
+    /**
+     * downloadFile
+     *
+     * @param url              下载链接
+     * @param callBackListener 回调监听
+     */
+    public static void downloadFile(String url, final OnRequestCallBackListener callBackListener) {
+        downloadFile(url, "", callBackListener);
+    }
+
+    /**
+     * downloadFile
+     *
+     * @param url              下载链接
+     * @param callBackListener 回调监听
+     * @param tag              调用的方法类型(区分调用的方法的回调参数)
+     */
+    public static void downloadFile(String url, String tag, final OnRequestCallBackListener callBackListener) {
+        Flowable flowable = mBaseApiService.downloadFile(url);
+        requestCallBack(flowable, tag, callBackListener);
+    }
+
 
     //===============================================================
 
