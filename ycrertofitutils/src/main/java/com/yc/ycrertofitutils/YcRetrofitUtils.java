@@ -2,6 +2,7 @@ package com.yc.ycrertofitutils;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.yc.ycrertofitutils.interfaces.OnRequestCallBackListener;
 import com.yc.ycrertofitutils.service.BaseApiService;
@@ -17,6 +18,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
+import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -138,6 +140,24 @@ public class YcRetrofitUtils {
     public YcRetrofitUtils addOkHttpInterceptor(Interceptor interceptor) {
         mInterceptor = checkNotNull(interceptor, "OkHttpAddInterceptor == null");
         getOkHttpClientBuilder().addInterceptor(mInterceptor);
+        return this;
+    }
+
+    /**
+     * 全局设置addNetworkInterceptor,默认 无
+     */
+    public YcRetrofitUtils addNetworkInterceptor(Interceptor interceptor) {
+        mInterceptor = checkNotNull(interceptor, "addNetworkInterceptor == null");
+        getOkHttpClientBuilder().addNetworkInterceptor(mInterceptor);
+        return this;
+    }
+
+    /**
+     * 全局设置addNetworkInterceptor,默认 无
+     */
+    public YcRetrofitUtils cache(Cache cache) {
+        Cache cache1 = checkNotNull(cache, "OkHttpCache == null");
+        getOkHttpClientBuilder().cache(cache1);
         return this;
     }
 
@@ -271,9 +291,18 @@ public class YcRetrofitUtils {
 
         if (mInterceptor == null) {
             //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    Log.d("YcRetrofitUtils", message);
+                }
+            });
             // BASIC，BODY，HEADERS
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            if (BuildConfig.DEBUG) {
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            } else {
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            }
             //添加拦截器
             addOkHttpInterceptor(interceptor);
         }
