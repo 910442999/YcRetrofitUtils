@@ -59,6 +59,7 @@ public class YcRetrofitUtils {
     private static Map<String, RequestBody> params;
     private volatile static YcRetrofitUtils sInstance = null;
     private static DisposableSubscriber sDisposableSubscriber;
+    private boolean isLog = false;
 
     private YcRetrofitUtils() {
         okHttpClientBuilder = new OkHttpClient.Builder();
@@ -125,6 +126,15 @@ public class YcRetrofitUtils {
     public static Retrofit.Builder getRetrofitBuilder() {
         return getInstance().retrofitBuilder;
     }
+
+    /**
+     * 设置log日志输出
+     */
+    public YcRetrofitUtils setLog(boolean log) {
+        isLog = log;
+        return this;
+    }
+
 
     /**
      * 全局为Retrofit设置自定义的OkHttpClient
@@ -298,7 +308,7 @@ public class YcRetrofitUtils {
                 }
             });
             // BASIC，BODY，HEADERS
-            if (BuildConfig.DEBUG) {
+            if (isLog) {
                 interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             } else {
                 interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
