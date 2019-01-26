@@ -67,6 +67,7 @@ public class YcRetrofitUtils {
     private static DisposableSubscriber sDisposableSubscriber;
     private boolean isLog = false;
     private Cache mCache;
+    private OkHttpClient mOkHttpClient;
 
     private YcRetrofitUtils() {
         okHttpClientBuilder = new OkHttpClient.Builder();
@@ -147,7 +148,7 @@ public class YcRetrofitUtils {
      * 全局为Retrofit设置自定义的OkHttpClient
      */
     public YcRetrofitUtils setOkclient(OkHttpClient client) {
-        getRetrofitBuilder().client(checkNotNull(client, "OkClient == null"));
+        mOkHttpClient = checkNotNull(client, "OkClient == null");
         return this;
     }
 
@@ -196,7 +197,7 @@ public class YcRetrofitUtils {
      */
     public YcRetrofitUtils setReadTimeOut(long readTimeOut) {
         if (readTimeOut < 0)
-            throw new IllegalArgumentException("retryCount must > 0");
+            throw new IllegalArgumentException("readTimeOut must > 0");
         mReadTimeOut = readTimeOut;
         return this;
     }
@@ -206,7 +207,7 @@ public class YcRetrofitUtils {
      */
     public YcRetrofitUtils setWriteTimeOut(long writeTimeout) {
         if (writeTimeout < 0)
-            throw new IllegalArgumentException("retryCount must > 0");
+            throw new IllegalArgumentException("writeTimeout must > 0");
         mWriteTimeOut = writeTimeout;
         return this;
     }
@@ -216,7 +217,7 @@ public class YcRetrofitUtils {
      */
     public YcRetrofitUtils setConnectTimeout(long connectTimeout) {
         if (connectTimeout < 0)
-            throw new IllegalArgumentException("retryCount must > 0");
+            throw new IllegalArgumentException("connectTimeout must > 0");
         mConnectTimeout = connectTimeout;
         return this;
     }
@@ -296,54 +297,49 @@ public class YcRetrofitUtils {
                 .baseUrl(checkNotNull(getBaseUrl(), "baseUrl == null"))
                 .addConverterFactory(mConverterFactory == null ? GsonConverterFactory.create() : mConverterFactory)
                 .addCallAdapterFactory(mCallAdapterFactory == null ? RxJava2CallAdapterFactory.create() : mCallAdapterFactory)
-                .client(getOkHttpClient());
+                .client(mOkHttpClient == null ? getOkHttpClient() : mOkHttpClient);
         return retrofitBuilder;
     }
 
 
     /**
      * 生成网络请求build请求体
+     * <p>
+     * 如果 mOkHttpClient  未设置  则设置默认的
      *
      * @return
      */
     public YcRetrofitUtils build() {
-        //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Log.d("YcRetrofitUtils", message);
+        //设置默认
+        if (mOkHttpClient == null) {
+            //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    Log.d("YcRetrofitUtils", message);
+                }
+            });
+            // BASIC，BODY，HEADERS
+            if (isLog) {
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            } else {
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
             }
-        });
-        // BASIC，BODY，HEADERS
-        if (isLog) {
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        } else {
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-        }
 
-        okHttpClientBuilder = getOkHttpClientBuilder().connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
-                .readTimeout(mReadTimeOut <= 0 ? DEFAULT_MILLISECONDS : mReadTimeOut, TimeUnit.MILLISECONDS)
-                .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS)
-                .addInterceptor(mInterceptor == null ? interceptor : mInterceptor);
+            okHttpClientBuilder = getOkHttpClientBuilder().connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
+                    .readTimeout(mReadTimeOut <= 0 ? DEFAULT_MILLISECONDS : mReadTimeOut, TimeUnit.MILLISECONDS)
+                    .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS)
+                    .addInterceptor(mInterceptor == null ? interceptor : mInterceptor);
 
-        if (mAddNetworkInterceptor != null) {
-            okHttpClientBuilder.addNetworkInterceptor(mAddNetworkInterceptor);
-        }
+            if (mAddNetworkInterceptor != null) {
+                okHttpClientBuilder.addNetworkInterceptor(mAddNetworkInterceptor);
+            }
 
-        if (mCache != null) {
-            okHttpClientBuilder.cache(mCache);
+            if (mCache != null) {
+                okHttpClientBuilder.cache(mCache);
+            }
         }
-        //
-        //        Retrofit build = new Retrofit.Builder()
-        //                .baseUrl("http://v.juhe.cn")
-        //                .client(okHttpBuilder.build())
-        //                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
-        //                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        //                .build();
-        //        mBaseApiService = build.create(BaseApiService.class);
-        //
         generateRetrofit();
-
         retrofit = getRetrofit();
         return this;
     }

@@ -47,7 +47,5 @@ public class MyApplication extends Application {
                         .create();
                 basicUseService = builder.create(BasicUseService.class);
 
-//        YcRetrofitUtils instance = YcRetrofitUtils.getInstance();
-//        instance.getMyRetrofit();
     }
 }
