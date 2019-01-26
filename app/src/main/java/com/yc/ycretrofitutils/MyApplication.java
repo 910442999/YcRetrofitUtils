@@ -35,19 +35,19 @@ public class MyApplication extends Application {
         //            interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         //        }
 
-        //        YcRetrofitUtils builder = YcRetrofitUtils.getInstance()
-        //                .init(this) //初始化
-        //                .setLog(true)
-        //                .setBaseUrl("http://v.juhe.cn/")
-        //
-        //                //                .setReadTimeOut(100)//默认 60000
-        //                //                .setWriteTimeOut(100)//默认 60000
-        //                //                .setConnectTimeout(100)//默认 60000
-        //                .build()
-        //                .create();
-        //        basicUseService = builder.create(BasicUseService.class);
+                YcRetrofitUtils builder = YcRetrofitUtils.getInstance()
+                        .init(this) //初始化
+                        .setLog(true)
+                        .setBaseUrl("http://v.juhe.cn/")
 
-        YcRetrofitUtils instance = YcRetrofitUtils.getInstance();
-        instance.getMyRetrofit();
+                        //                .setReadTimeOut(100)//默认 60000
+                        //                .setWriteTimeOut(100)//默认 60000
+                        //                .setConnectTimeout(100)//默认 60000
+                        .build()
+                        .create();
+                basicUseService = builder.create(BasicUseService.class);
+
+//        YcRetrofitUtils instance = YcRetrofitUtils.getInstance();
+//        instance.getMyRetrofit();
     }
 }

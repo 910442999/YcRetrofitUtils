@@ -66,6 +66,7 @@ public class YcRetrofitUtils {
     private volatile static YcRetrofitUtils sInstance = null;
     private static DisposableSubscriber sDisposableSubscriber;
     private boolean isLog = false;
+    private Cache mCache;
 
     private YcRetrofitUtils() {
         okHttpClientBuilder = new OkHttpClient.Builder();
@@ -170,8 +171,7 @@ public class YcRetrofitUtils {
      * 全局设置addNetworkInterceptor,默认 无
      */
     public YcRetrofitUtils cache(Cache cache) {
-        Cache cache1 = checkNotNull(cache, "OkHttpCache == null");
-        getOkHttpClientBuilder().cache(cache1);
+        mCache = checkNotNull(cache, "OkHttpCache == null");
         return this;
     }
 
@@ -292,9 +292,11 @@ public class YcRetrofitUtils {
      * 根据当前的请求参数，生成对应的Retrofit
      */
     private Retrofit.Builder generateRetrofit() {
-        Retrofit.Builder retrofitBuilder = getRetrofitBuilder().baseUrl(checkNotNull(getBaseUrl(), "baseUrl == null"));
-        retrofitBuilder.addConverterFactory(mConverterFactory == null ? GsonConverterFactory.create() : mConverterFactory)
-                .addCallAdapterFactory(mCallAdapterFactory == null ? RxJava2CallAdapterFactory.create() : mCallAdapterFactory);
+        retrofitBuilder = getRetrofitBuilder()
+                .baseUrl(checkNotNull(getBaseUrl(), "baseUrl == null"))
+                .addConverterFactory(mConverterFactory == null ? GsonConverterFactory.create() : mConverterFactory)
+                .addCallAdapterFactory(mCallAdapterFactory == null ? RxJava2CallAdapterFactory.create() : mCallAdapterFactory)
+                .client(getOkHttpClient());
         return retrofitBuilder;
     }
 
@@ -319,19 +321,30 @@ public class YcRetrofitUtils {
             interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         }
 
-        OkHttpClient.Builder okHttpClientBuilder = getOkHttpClientBuilder();
-
-        OkHttpClient.Builder okHttpBuilder = okHttpClientBuilder.connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
+        okHttpClientBuilder = getOkHttpClientBuilder().connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
                 .readTimeout(mReadTimeOut <= 0 ? DEFAULT_MILLISECONDS : mReadTimeOut, TimeUnit.MILLISECONDS)
                 .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS)
                 .addInterceptor(mInterceptor == null ? interceptor : mInterceptor);
 
         if (mAddNetworkInterceptor != null) {
-            okHttpBuilder.addNetworkInterceptor(mAddNetworkInterceptor);
+            okHttpClientBuilder.addNetworkInterceptor(mAddNetworkInterceptor);
         }
-        Retrofit.Builder retrofitBuilder = generateRetrofit();
-        retrofitBuilder.client(okHttpBuilder.build());
-        retrofit = retrofitBuilder.build();
+
+        if (mCache != null) {
+            okHttpClientBuilder.cache(mCache);
+        }
+        //
+        //        Retrofit build = new Retrofit.Builder()
+        //                .baseUrl("http://v.juhe.cn")
+        //                .client(okHttpBuilder.build())
+        //                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
+        //                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        //                .build();
+        //        mBaseApiService = build.create(BaseApiService.class);
+        //
+        generateRetrofit();
+
+        retrofit = getRetrofit();
         return this;
     }
 
@@ -759,40 +772,5 @@ public class YcRetrofitUtils {
         if (disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
         }
-    }
-
-
-    private OkHttpClient createOkHttp() {
-        OkHttpClient.Builder client = new OkHttpClient.Builder();
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Log.i("11411111", message);
-            }
-        });
-        if (BuildConfig.DEBUG) {
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        } else {
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-        }
-
-        OkHttpClient okHttpClient = client
-                .addInterceptor(interceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .build();
-        return okHttpClient;
-    }
-
-    public YcRetrofitUtils getMyRetrofit() {
-        Retrofit build = new Retrofit.Builder()
-                .baseUrl("http://v.juhe.cn")
-                .client(createOkHttp())
-                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().create()))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        mBaseApiService = build.create(BaseApiService.class);
-        return this;
     }
 }
