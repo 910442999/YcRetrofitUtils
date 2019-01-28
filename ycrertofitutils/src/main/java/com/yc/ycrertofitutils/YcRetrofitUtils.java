@@ -316,7 +316,7 @@ public class YcRetrofitUtils {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                 @Override
                 public void log(String message) {
-                    Log.d("YcRetrofitUtils", message);
+                    Log.i("YcRetrofitUtils", message);
                 }
             });
             // BASIC，BODY，HEADERS
@@ -332,11 +332,11 @@ public class YcRetrofitUtils {
                     .addInterceptor(mInterceptor == null ? interceptor : mInterceptor);
 
             if (mAddNetworkInterceptor != null) {
-                okHttpClientBuilder.addNetworkInterceptor(mAddNetworkInterceptor);
+                okHttpClientBuilder = getOkHttpClientBuilder().addNetworkInterceptor(mAddNetworkInterceptor);
             }
 
             if (mCache != null) {
-                okHttpClientBuilder.cache(mCache);
+                okHttpClientBuilder = getOkHttpClientBuilder().cache(mCache);
             }
         }
         generateRetrofit();
