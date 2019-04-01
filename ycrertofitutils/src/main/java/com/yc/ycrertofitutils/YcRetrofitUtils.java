@@ -724,13 +724,15 @@ public class YcRetrofitUtils {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    callBackListener.onFailed(e.getMessage().toString(), tag);
+                    if (e.getMessage() != null)
+                        callBackListener.onFailed(e.getMessage().toString(), tag);
                 }
             }
 
             @Override
             public void onError(Throwable t) {
-                callBackListener.onFailed(t.getMessage().toString(), tag);
+                if (t.getMessage() != null)
+                    callBackListener.onFailed(t.getMessage().toString(), tag);
             }
 
             @Override
