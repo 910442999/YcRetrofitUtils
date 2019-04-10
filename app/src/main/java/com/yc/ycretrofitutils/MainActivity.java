@@ -42,10 +42,10 @@ public class MainActivity extends AppCompatActivity {
                 mMap = new HashMap();
                 mMap.put("key", "4a216a3fde4361f175aa2678dada199b");
                 mMap.put("type", "top");
-                YcRetrofitUtils.get(UrlConfig.NEWS_URL, mMap, new OnRequestCallBackListener() {
+                YcRetrofitUtils.get(UrlConfig.NEWS_URL, mMap, new OnRequestCallBackListener<String>() {
 
                     @Override
-                    public <Q> void onSuccess(Q body, String tag) {
+                    public void onSuccess(String body, String tag) {
 
                         Toast.makeText(MainActivity.this, (String) body, Toast.LENGTH_SHORT).show();
                     }
@@ -63,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
                 mMap = new HashMap();
                 mMap.put("key", "4a216a3fde4361f175aa2678dada199b");
                 mMap.put("type", "top");
-//                BasicUseService basicUseService = YcRetrofitUtils.getRetrofit().create(BasicUseService.class);
+                //                BasicUseService basicUseService = YcRetrofitUtils.getRetrofit().create(BasicUseService.class);
                 Flowable login = basicUseService.login("toutiao/index", mMap);
-                YcRetrofitUtils.requestCallBack(login, "", new OnRequestCallBackListener() {
+                YcRetrofitUtils.requestCallBack(login, "", new OnRequestCallBackListener<NewsBean>() {
                     @Override
-                    public <Q> void onSuccess(Q body, String tag) {
+                    public void onSuccess(NewsBean body, String tag) {
                         if (body instanceof NewsBean) {
                             Toast.makeText(MainActivity.this, body.toString(), Toast.LENGTH_SHORT).show();
                         }

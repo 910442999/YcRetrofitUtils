@@ -1,8 +1,8 @@
 package com.yc.ycrertofitutils.interfaces;
 
-public interface OnRequestCallBackListener {
+public interface OnRequestCallBackListener<Q> {
 
-    <Q> void onSuccess(Q body, String tag);
+    void onSuccess(Q body, String tag);
 
     void onFailed(String e, String tag);
 }
