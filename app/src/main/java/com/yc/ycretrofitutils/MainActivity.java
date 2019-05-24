@@ -17,6 +17,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.DisposableSubscriber;
 
 import static com.yc.ycretrofitutils.MyApplication.basicUseService;
 
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(String body, String tag) {
 
                         Toast.makeText(MainActivity.this, (String) body, Toast.LENGTH_SHORT).show();
+
                     }
 
                     @Override
@@ -55,29 +58,35 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-
                 //                //二次封装
                 //                startActivity(new Intent(this,BasicUseActivity.class));
                 break;
             case R.id.test2:
-                mMap = new HashMap();
-                mMap.put("key", "4a216a3fde4361f175aa2678dada199b");
-                mMap.put("type", "top");
-                //                BasicUseService basicUseService = YcRetrofitUtils.getRetrofit().create(BasicUseService.class);
-                Flowable login = basicUseService.login("toutiao/index", mMap);
-                YcRetrofitUtils.requestCallBack(login, "", new OnRequestCallBackListener<NewsBean>() {
-                    @Override
-                    public void onSuccess(NewsBean body, String tag) {
-                        if (body instanceof NewsBean) {
-                            Toast.makeText(MainActivity.this, body.toString(), Toast.LENGTH_SHORT).show();
+
+                for (int i = 0; i < 10; i++) {
+                    mMap = new HashMap();
+                    mMap.put("key", "4a216a3fde4361f175aa2678dada199b");
+                    mMap.put("type", "top");
+                    final int s = i;
+                    //                BasicUseService basicUseService = YcRetrofitUtils.getRetrofit().create(BasicUseService.class);
+                    final Flowable login = basicUseService.login("toutiao/index", mMap);
+                     YcRetrofitUtils.requestCallBack(login,new OnRequestCallBackListener<NewsBean>() {
+                        @Override
+                        public void onSuccess(NewsBean body, String tag) {
+                            if (body instanceof NewsBean) {
+                                Toast.makeText(MainActivity.this, "第 " + s + " 请求", Toast.LENGTH_SHORT).show();
+                                //                                Toast.makeText(MainActivity.this, body.toString(), Toast.LENGTH_SHORT).show();
+//                                login.unsubscribeOn(Schedulers.io());
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailed(String e, String tag) {
+                        @Override
+                        public void onFailed(String e, String tag) {
 
-                    }
-                });
+                        }
+                    });
+
+                }
 
                 //                startActivity(new Intent(this,SecondaryPackagingActivity.class));
 

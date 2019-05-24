@@ -64,10 +64,10 @@ public class YcRetrofitUtils {
     //定义公共的参数
     private static Map<String, RequestBody> params;
     private volatile static YcRetrofitUtils sInstance = null;
-    private static DisposableSubscriber sDisposableSubscriber;
     private boolean isLog = false;
     private Cache mCache;
     private OkHttpClient mOkHttpClient;
+    private static Object responseBody;
 
     private YcRetrofitUtils() {
         okHttpClientBuilder = new OkHttpClient.Builder();
@@ -312,24 +312,31 @@ public class YcRetrofitUtils {
     public YcRetrofitUtils build() {
         //设置默认
         if (mOkHttpClient == null) {
-            //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                @Override
-                public void log(String message) {
-                    Log.i("YcRetrofitUtils", message);
-                }
-            });
-            // BASIC，BODY，HEADERS
-            if (isLog) {
-                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            } else {
-                interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-            }
+
 
             okHttpClientBuilder = getOkHttpClientBuilder().connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
                     .readTimeout(mReadTimeOut <= 0 ? DEFAULT_MILLISECONDS : mReadTimeOut, TimeUnit.MILLISECONDS)
-                    .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS)
-                    .addInterceptor(mInterceptor == null ? interceptor : mInterceptor);
+                    .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS);
+
+
+            if (mInterceptor == null) {
+                //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+                    @Override
+                    public void log(String message) {
+                        Log.d("YcRetrofitUtils", message);
+                    }
+                });
+                // BASIC，BODY，HEADERS
+                if (isLog) {
+                    interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                } else {
+                    interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+                }
+                okHttpClientBuilder = getOkHttpClientBuilder().addInterceptor(interceptor);
+            } else {
+                okHttpClientBuilder = getOkHttpClientBuilder().addInterceptor(mInterceptor);
+            }
 
             if (mAddNetworkInterceptor != null) {
                 okHttpClientBuilder = getOkHttpClientBuilder().addNetworkInterceptor(mAddNetworkInterceptor);
@@ -706,69 +713,53 @@ public class YcRetrofitUtils {
      * @param <T>              泛型参数
      */
 
-    public static <T> void requestCallBack(Flowable<T> flowable, final String tag, final OnRequestCallBackListener callBackListener) {
-        sDisposableSubscriber = requestCallBack(tag, callBackListener);
-        onSubscribe(flowable, sDisposableSubscriber);
+    public static <T> void requestCallBack(final Flowable<T> flowable, final String tag, final OnRequestCallBackListener callBackListener) {
+        requestCallBack(flowable, tag, true, callBackListener);
     }
 
-    public static <T> DisposableSubscriber requestCallBack(final String tag, final OnRequestCallBackListener callBackListener) {
-        sDisposableSubscriber = new DisposableSubscriber<T>() {
-            @Override
-            public void onNext(T body) {
-                try {
-                    if (body instanceof ResponseBody) {
-                        String response = ((ResponseBody) body).string();
-                        callBackListener.onSuccess(response, tag);
-                    } else {
-                        callBackListener.onSuccess(body, tag);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    if (e.getMessage() != null)
-                        callBackListener.onFailed(e.getMessage().toString(), tag);
-                }
-            }
+    /**
+     * 处理数据请求相关功能，将flowable加入队列,通过接口回调的方式将rxjava返回的数据返回给调用者
+     *
+     * @param callBackListener 回调
+     * @param tag              调用方法标志，回调用
+     * @param <T>              泛型参数
+     */
 
-            @Override
-            public void onError(Throwable t) {
-                if (t.getMessage() != null)
-                    callBackListener.onFailed(t.getMessage().toString(), tag);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-
-        return sDisposableSubscriber;
-    }
-
-
-    public static <T> void onSubscribe(Flowable<T> flowable) {
-        onSubscribe(flowable, sDisposableSubscriber);
-    }
-
-    public static <T> void onSubscribe(Flowable<T> flowable, DisposableSubscriber<T> disposableSubscriber) {
-        Flowable<T> beanFlowable = flowable.subscribeOn(Schedulers.io());
-        beanFlowable.observeOn(AndroidSchedulers.mainThread())
+    public static <T> void requestCallBack(final Flowable<T> flowable, final String tag, final boolean unsubscribe, final OnRequestCallBackListener callBackListener) {
+        flowable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(new RetryExceptionFunc(mRetryCount, mRetryDelay, mRetryIncreaseDelay))
-                .subscribeWith(disposableSubscriber);
-    }
+                .subscribeWith(new DisposableSubscriber<T>() {
+                    @Override
+                    public void onNext(T body) {
+                        responseBody = body;
+                    }
 
-    /**
-     * 取消订阅
-     */
-    public static void cancelSubscription() {
-        cancelSubscription(sDisposableSubscriber);
-    }
+                    @Override
+                    public void onError(Throwable t) {
+                        if (t.getMessage() != null)
+                            callBackListener.onFailed(t.getMessage().toString(), tag);
+                        if (unsubscribe)
+                            flowable.unsubscribeOn(Schedulers.io());
+                    }
 
-    /**
-     * 取消订阅
-     */
-    public static void cancelSubscription(Disposable disposable) {
-        if (disposable != null && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
+                    @Override
+                    public void onComplete() {
+                        try {
+                            if (responseBody instanceof ResponseBody) {
+                                String response = ((ResponseBody) responseBody).string();
+                                callBackListener.onSuccess(response, tag);
+                            } else {
+                                callBackListener.onSuccess(responseBody, tag);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            if (e.getMessage() != null)
+                                callBackListener.onFailed(e.getMessage().toString(), tag);
+                        }
+                        if (unsubscribe)
+                            flowable.unsubscribeOn(Schedulers.io());
+                    }
+                });
     }
 }
