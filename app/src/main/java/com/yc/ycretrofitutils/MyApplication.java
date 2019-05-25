@@ -44,6 +44,7 @@ public class MyApplication extends Application {
         YcRetrofitUtils builder = YcRetrofitUtils.getInstance()
                 .init(this) //初始化
                 .setLog(true)
+                .setLogTag("ycLog")
                 .setBaseUrl("http://v.juhe.cn/")
 
                 //                .setReadTimeOut(100)//默认 60000

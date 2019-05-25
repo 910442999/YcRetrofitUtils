@@ -65,6 +65,7 @@ public class YcRetrofitUtils {
     private static Map<String, RequestBody> params;
     private volatile static YcRetrofitUtils sInstance = null;
     private boolean isLog = false;
+    private String logTag = "YcRetrofitUtils";
     private Cache mCache;
     private OkHttpClient mOkHttpClient;
     private static Object responseBody;
@@ -92,7 +93,7 @@ public class YcRetrofitUtils {
     }
 
     /**
-     * 必须在全局Application先调用，获取context上下文，否则缓存无法使用
+     * 必须在全局Application先调用，获取context上下文
      */
     public YcRetrofitUtils init(Application app) {
         sContext = app;
@@ -140,6 +141,14 @@ public class YcRetrofitUtils {
      */
     public YcRetrofitUtils setLog(boolean log) {
         isLog = log;
+        return this;
+    }
+
+    /**
+     * 设置log日志输出
+     */
+    public YcRetrofitUtils setLogTag(String tag) {
+        logTag = tag;
         return this;
     }
 
@@ -312,19 +321,15 @@ public class YcRetrofitUtils {
     public YcRetrofitUtils build() {
         //设置默认
         if (mOkHttpClient == null) {
-
-
             okHttpClientBuilder = getOkHttpClientBuilder().connectTimeout(mConnectTimeout <= 0 ? DEFAULT_MILLISECONDS : mConnectTimeout, TimeUnit.MILLISECONDS)
                     .readTimeout(mReadTimeOut <= 0 ? DEFAULT_MILLISECONDS : mReadTimeOut, TimeUnit.MILLISECONDS)
                     .writeTimeout(mWriteTimeOut <= 0 ? DEFAULT_MILLISECONDS : mWriteTimeOut, TimeUnit.MILLISECONDS);
-
-
             if (mInterceptor == null) {
                 //由于Retrofit是基于okhttp的所以，要先初始化okhttp相关配置
                 HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                     @Override
                     public void log(String message) {
-                        Log.d("YcRetrofitUtils", message);
+                        Log.i(logTag, message);
                     }
                 });
                 // BASIC，BODY，HEADERS
