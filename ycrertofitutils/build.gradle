@@ -19,22 +19,31 @@ android {
 
 }
 
+def retrofitVersion = "2.4.0"
+def okHttpVersion = "3.11.0"
+//def rxlifecycle = "2.2.1"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    // 集成retrofit
-    api 'com.squareup.retrofit2:retrofit:2.3.0'
-    // 如果需要集成json解析，还需要添加库：
-    api 'com.squareup.retrofit2:converter-gson:2.3.0'
-    //  如果还需要集成rxjava，还需要添加库：
-    api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-    api 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    api 'io.reactivex.rxjava2:rxjava:2.1.1'
-    //okhttp3的log日志
-    api 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+
+    //rx
+    api "io.reactivex.rxjava2:rxjava:2.2.3"
+    api "io.reactivex.rxjava2:rxandroid:2.1.0"
+//    api "com.trello.rxlifecycle2:rxlifecycle:${rxlifecycle}"
+//    api "com.trello.rxlifecycle2:rxlifecycle-components:${rxlifecycle}"
+
+    //retrofit
+    api "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    api "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
+    api "com.squareup.retrofit2:converter-scalars:${retrofitVersion}"
+    api "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    //okHttp3
+    api "com.squareup.okhttp3:okhttp:${okHttpVersion}"
+    api "com.squareup.okhttp3:logging-interceptor:${okHttpVersion}"
+
 }
 //上传
 apply from: 'bintrayUpload.gradle'
